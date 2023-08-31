@@ -1,4 +1,4 @@
-name: Debugged Diff and Folder Check
+name: Optimized Diff and Folder Check
 
 on:
   push:
@@ -6,24 +6,25 @@ on:
       - main
 
 jobs:
-  debugged-diff-folder-check:
+  optimized-diff-folder-check:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 2  # 1 is default commit, 2 will give us the parent commit
 
     - name: Categorize Changes
       run: |
-        git fetch --depth=50 origin main
-        COMMIT_RANGE="${{ github.event.before }}..${{ github.sha }}"
+        PARENT_COMMIT=$(git rev-parse HEAD~1)
+        LATEST_COMMIT=$(git rev-parse HEAD)
+        COMMIT_RANGE="$PARENT_COMMIT..$LATEST_COMMIT"
+        
         ADDED_FILES=$(git diff --name-status --diff-filter=A $COMMIT_RANGE | awk '{print $2}')
         REMOVED_FILES=$(git diff --name-status --diff-filter=D $COMMIT_RANGE | awk '{print $2}')
         MODIFIED_FILES=$(git diff --name-status --diff-filter=M $COMMIT_RANGE | awk '{print $2}')
-        RENAMED=$(git diff --name-status --diff-filter=R $COMMIT_RANGE | awk '{print $2 " " $3}')
-
+        
         ADDED_FOLDERS=""
         REMOVED_FOLDERS=""
         MODIFIED_FOLDERS=""
@@ -49,26 +50,6 @@ jobs:
           while [ "$DIR" != "." ]; do
             MODIFIED_FOLDERS+=" $DIR"
             DIR=$(dirname "$DIR")
-          done
-        done
-
-        for LINE in $RENAMED; do
-          FROM=$(echo $LINE | awk '{print $1}')
-          TO=$(echo $LINE | awk '{print $2}')
-          REMOVED_FILES+=" $FROM"
-          ADDED_FILES+=" $TO"
-
-          FROM_DIR=$(dirname "$FROM")
-          TO_DIR=$(dirname "$TO")
-
-          while [ "$FROM_DIR" != "." ]; do
-            REMOVED_FOLDERS+=" $FROM_DIR"
-            FROM_DIR=$(dirname "$FROM_DIR")
-          done
-
-          while [ "$TO_DIR" != "." ]; do
-            ADDED_FOLDERS+=" $TO_DIR"
-            TO_DIR=$(dirname "$TO_DIR")
           done
         done
 
