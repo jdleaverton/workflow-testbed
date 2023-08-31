@@ -22,6 +22,7 @@ jobs:
         ADDED_FILES=$(git diff --name-status --diff-filter=A $COMMIT_RANGE | awk '{print $2}')
         REMOVED_FILES=$(git diff --name-status --diff-filter=D $COMMIT_RANGE | awk '{print $2}')
         MODIFIED_FILES=$(git diff --name-status --diff-filter=M $COMMIT_RANGE | awk '{print $2}')
+        RENAMED=$(git diff --name-status --diff-filter=R $COMMIT_RANGE | awk '{print $2 " " $3}')
 
         ADDED_FOLDERS=""
         REMOVED_FOLDERS=""
