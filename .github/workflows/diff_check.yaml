@@ -1,4 +1,4 @@
-name: Enhanced Diff and Folder Check
+name: Refined Diff and Folder Check
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  enhanced-diff-folder-check:
+  refined-diff-folder-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,17 +19,25 @@ jobs:
       run: |
         git fetch origin main
         ADDED_FILES=$(git diff --name-status --diff-filter=A HEAD~1 HEAD | awk '{print $2}')
+        REMOVED_FILES=$(git diff --name-status --diff-filter=D HEAD~1 HEAD | awk '{print $2}')
         MODIFIED_FILES=$(git diff --name-status --diff-filter=M HEAD~1 HEAD | awk '{print $2}')
-        MOVED_FILES=$(git diff --name-status --diff-filter=R HEAD~1 HEAD | awk '{print $2 " " $3}')
-
+        
         ADDED_FOLDERS=""
+        REMOVED_FOLDERS=""
         MODIFIED_FOLDERS=""
-        MOVED_FOLDERS=""
 
         for FILE in $ADDED_FILES; do
           DIR=$(dirname "$FILE")
           while [ "$DIR" != "." ]; do
             ADDED_FOLDERS+=" $DIR"
+            DIR=$(dirname "$DIR")
+          done
+        done
+
+        for FILE in $REMOVED_FILES; do
+          DIR=$(dirname "$FILE")
+          while [ "$DIR" != "." ]; do
+            REMOVED_FOLDERS+=" $DIR"
             DIR=$(dirname "$DIR")
           done
         done
@@ -42,17 +50,9 @@ jobs:
           done
         done
 
-        for LINE in $MOVED_FILES; do
-          FROM=$(echo "$LINE" | awk '{print $1}')
-          TO=$(echo "$LINE" | awk '{print $2}')
-          FROM_DIR=$(dirname "$FROM")
-          TO_DIR=$(dirname "$TO")
-          MOVED_FOLDERS+=" $FROM_DIR $TO_DIR"
-        done
-
         echo "Added Files: $ADDED_FILES"
+        echo "Removed Files: $REMOVED_FILES"
         echo "Modified Files: $MODIFIED_FILES"
-        echo "Moved Files: $MOVED_FILES"
         echo "Added Folders: $ADDED_FOLDERS"
+        echo "Removed Folders: $REMOVED_FOLDERS"
         echo "Modified Folders: $MODIFIED_FOLDERS"
-        echo "Moved Folders: $MOVED_FOLDERS"
