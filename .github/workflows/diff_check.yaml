@@ -1,4 +1,4 @@
-name: Refined Diff and Folder Check
+name: Debugged Diff and Folder Check
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  refined-diff-folder-check:
+  debugged-diff-folder-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,11 +17,12 @@ jobs:
 
     - name: Categorize Changes
       run: |
-        git fetch origin main
-        ADDED_FILES=$(git diff --name-status --diff-filter=A HEAD~1 HEAD | awk '{print $2}')
-        REMOVED_FILES=$(git diff --name-status --diff-filter=D HEAD~1 HEAD | awk '{print $2}')
-        MODIFIED_FILES=$(git diff --name-status --diff-filter=M HEAD~1 HEAD | awk '{print $2}')
-        
+        git fetch --depth=50 origin main
+        COMMIT_RANGE="${{ github.event.before }}..${{ github.sha }}"
+        ADDED_FILES=$(git diff --name-status --diff-filter=A $COMMIT_RANGE | awk '{print $2}')
+        REMOVED_FILES=$(git diff --name-status --diff-filter=D $COMMIT_RANGE | awk '{print $2}')
+        MODIFIED_FILES=$(git diff --name-status --diff-filter=M $COMMIT_RANGE | awk '{print $2}')
+
         ADDED_FOLDERS=""
         REMOVED_FOLDERS=""
         MODIFIED_FOLDERS=""
