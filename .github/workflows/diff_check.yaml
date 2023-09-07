@@ -15,6 +15,16 @@ jobs:
       with:
         fetch-depth: 2
 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
     - name: Get Changed Files
       id: getfile
       shell: bash
@@ -36,3 +46,6 @@ jobs:
         echo "Deleted files: $deleted"
         echo "Renamed files: $renamed"
         # Add your procedures for handling the changes here
+
+    - name: Run OpenAI Script
+      run: python DoPE.py
