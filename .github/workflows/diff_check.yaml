@@ -21,10 +21,12 @@ jobs:
         echo "::set-output name=modified::$(git diff --name-only --diff-filter=M HEAD~1)"
         echo "::set-output name=added::$(git diff --name-only --diff-filter=A HEAD~1)"
         echo "::set-output name=deleted::$(git diff --name-only --diff-filter=D HEAD~1)"
+        echo "::set-output name=renamed::$(git diff --name-status --diff-filter=R HEAD~1 | awk '{print $2 " => " $3}')"
 
     - name: Handle Changes
       run: |
         echo "Modified files: ${{ steps.getfile.outputs.modified }}"
         echo "Added files: ${{ steps.getfile.outputs.added }}"
         echo "Deleted files: ${{ steps.getfile.outputs.deleted }}"
+        echo "Renamed files: ${{ steps.getfile.outputs.renamed }}"
         # Add your procedures for handling the changes here
