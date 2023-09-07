@@ -22,6 +22,9 @@ jobs:
         echo "::set-output name=added::$(git diff --name-only --diff-filter=A HEAD~1)"
         echo "::set-output name=deleted::$(git diff --name-only --diff-filter=D HEAD~1)"
         echo "::set-output name=renamed::$(git diff --name-status --diff-filter=R HEAD~1 | awk '{print $2 " => " $3}')"
+        echo "::set-output name=copied::$(git diff --name-status --diff-filter=C HEAD~1 | awk '{print $2 " => " $3}')"
+        echo "::set-output name=typechanged::$(git diff --name-only --diff-filter=T HEAD~1)"
+        echo "::set-output name=unmerged::$(git diff --name-only --diff-filter=U HEAD~1)"
 
     - name: Handle Changes
       run: |
@@ -29,4 +32,7 @@ jobs:
         echo "Added files: ${{ steps.getfile.outputs.added }}"
         echo "Deleted files: ${{ steps.getfile.outputs.deleted }}"
         echo "Renamed files: ${{ steps.getfile.outputs.renamed }}"
+        echo "Copied files: ${{ steps.getfile.outputs.copied }}"
+        echo "Type-changed files: ${{ steps.getfile.outputs.typechanged }}"
+        echo "Unmerged files: ${{ steps.getfile.outputs.unmerged }}"
         # Add your procedures for handling the changes here
