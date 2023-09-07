@@ -17,11 +17,17 @@ jobs:
 
     - name: Get Changed Files
       id: getfile
+      shell: bash
       run: |
-        echo "modified=$(git diff --name-only --diff-filter=M HEAD~1)" >> $GITHUB_ENV
-        echo "added=$(git diff --name-only --diff-filter=A HEAD~1)" >> $GITHUB_ENV
-        echo "deleted=$(git diff --name-only --diff-filter=D HEAD~1)" >> $GITHUB_ENV
-        echo "renamed=$(git diff --name-status --diff-filter=R HEAD~1 | awk '{print $2 " => " $3}')" >> $GITHUB_ENV
+        modified=($(git diff --name-only --diff-filter=M HEAD~1))
+        added=($(git diff --name-only --diff-filter=A HEAD~1))
+        deleted=($(git diff --name-only --diff-filter=D HEAD~1))
+        renamed=($(git diff --name-status --diff-filter=R HEAD~1 | awk '{print $2 " => " $3}'))
+        
+        echo "modified=${modified[*]}" >> $GITHUB_ENV
+        echo "added=${added[*]}" >> $GITHUB_ENV
+        echo "deleted=${deleted[*]}" >> $GITHUB_ENV
+        echo "renamed=${renamed[*]}" >> $GITHUB_ENV
 
     - name: Handle Changes
       run: |
