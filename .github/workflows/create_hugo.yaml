@@ -19,13 +19,18 @@ jobs:
           sudo dpkg -i hugo_0.79.1_Linux-64bit.deb
 
       - name: Create new Hugo site
-        run: hugo new site .
+        run: |
+          mkdir hugo
+          cd hugo
+          hugo new site .
 
       - name: Build
-        run: hugo --minify  # Build your Hugo site
+        run: |
+          cd hugo
+          hugo --minify  # Build your Hugo site
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.WORKFLOWSECRET }}
-          publish_dir: ./public
+          publish_dir: ./hugo/public
