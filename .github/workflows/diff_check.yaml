@@ -48,4 +48,4 @@ jobs:
         # Add your procedures for handling the changes here
 
     - name: Run OpenAI Script
-      run: python .github/workflows/DoPE.py
+      run: python .github/workflows/DoPE.py "$modified" "$added" "$deleted" "$renamed"
