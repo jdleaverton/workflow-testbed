@@ -1,4 +1,4 @@
-name: Optimized Diff and Folder Check
+name: Update Mirror File Tree
 
 on:
   push:
@@ -6,56 +6,25 @@ on:
       - main
 
 jobs:
-  optimized-diff-folder-check:
+  update-mirror:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
       with:
-        fetch-depth: 2  # 1 is default commit, 2 will give us the parent commit
+        fetch-depth: 2
 
-    - name: Categorize Changes
+    - name: Get Changed Files
+      id: getfile
       run: |
-        PARENT_COMMIT=$(git rev-parse HEAD~1)
-        LATEST_COMMIT=$(git rev-parse HEAD)
-        COMMIT_RANGE="$PARENT_COMMIT..$LATEST_COMMIT"
-        
-        ADDED_FILES=$(git diff --name-status --diff-filter=A $COMMIT_RANGE | awk '{print $2}')
-        REMOVED_FILES=$(git diff --name-status --diff-filter=D $COMMIT_RANGE | awk '{print $2}')
-        MODIFIED_FILES=$(git diff --name-status --diff-filter=M $COMMIT_RANGE | awk '{print $2}')
-        
-        ADDED_FOLDERS=""
-        REMOVED_FOLDERS=""
-        MODIFIED_FOLDERS=""
+        echo "::set-output name=modified::$(git diff --name-only --diff-filter=M HEAD~1)"
+        echo "::set-output name=added::$(git diff --name-only --diff-filter=A HEAD~1)"
+        echo "::set-output name=deleted::$(git diff --name-only --diff-filter=D HEAD~1)"
 
-        for FILE in $ADDED_FILES; do
-          DIR=$(dirname "$FILE")
-          while [ "$DIR" != "." ]; do
-            ADDED_FOLDERS+=" $DIR"
-            DIR=$(dirname "$DIR")
-          done
-        done
-
-        for FILE in $REMOVED_FILES; do
-          DIR=$(dirname "$FILE")
-          while [ "$DIR" != "." ]; do
-            REMOVED_FOLDERS+=" $DIR"
-            DIR=$(dirname "$DIR")
-          done
-        done
-
-        for FILE in $MODIFIED_FILES; do
-          DIR=$(dirname "$FILE")
-          while [ "$DIR" != "." ]; do
-            MODIFIED_FOLDERS+=" $DIR"
-            DIR=$(dirname "$DIR")
-          done
-        done
-
-        echo "Added Files: $ADDED_FILES"
-        echo "Removed Files: $REMOVED_FILES"
-        echo "Modified Files: $MODIFIED_FILES"
-        echo "Added Folders: $ADDED_FOLDERS"
-        echo "Removed Folders: $REMOVED_FOLDERS"
-        echo "Modified Folders: $MODIFIED_FOLDERS"
+    - name: Handle Changes
+      run: |
+        echo "Modified files: ${{ steps.getfile.outputs.modified }}"
+        echo "Added files: ${{ steps.getfile.outputs.added }}"
+        echo "Deleted files: ${{ steps.getfile.outputs.deleted }}"
+        # Add your procedures for handling the changes here
